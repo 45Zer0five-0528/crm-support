@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CRM Support Center · Kommo</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root{
+  --bg:#070a10;--s1:#0e1220;--s2:#141929;--s3:#1c2438;--s4:#222d45;
+  --bdr:#2a3550;--bdr2:#364260;
+  --blue:#4a90e2;--blue2:#6aaaf8;--blueg:rgba(74,144,226,.15);--blueglow:rgba(74,144,226,.3);
+  --green:#27c98a;--greeng:rgba(39,201,138,.12);
+  --red:#e85555;--redg:rgba(232,85,85,.12);
+  --amber:#e8a025;--amberg:rgba(232,160,37,.12);
+  --gold:#e8c025;--goldg:rgba(232,192,37,.12);
+  --cyan:#25cce8;
+  --t0:#edf0fa;--t1:#b4bad6;--t2:#6e7898;--t3:#3d4666;
+  --sans:'Sora',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r:8px;--r2:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t0);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden}
+/* subtle grid */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:linear-gradient(rgba(74,144,226,.025) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(74,144,226,.025) 1px,transparent 1px);
+  background-size:44px 44px}
+#app{position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{height:54px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;background:rgba(7,10,16,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:200}
+.hlogo{font-family:var(--mono);font-size:13px;color:var(--blue);letter-spacing:.05em;display:flex;align-items:center;gap:8px}
+.hlogo .dot{color:var(--bdr2)}
+.hright{display:flex;align-items:center;gap:12px}
+#huser{font-family:var(--mono);font-size:11px;color:var(--t2);display:none}
+#huser b{color:var(--blue2)}
+.gb-badge{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.05em;display:none;text-align:right;line-height:1.5}
+.gb-badge em{color:var(--gold);font-style:normal}
+#hout{display:none;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--bdr);color:var(--t2);padding:5px 12px;border-radius:var(--r);cursor:pointer;transition:.2s}
+#hout:hover{border-color:var(--red);color:var(--red)}
+
+/* ── VIEWS ── */
+.view{display:none}.view.show{display:block}
+
+/* ── AUTH ── */
+#vAuth{min-height:100vh;display:none;align-items:center;justify-content:center;padding:32px 16px}
+#vAuth.show{display:flex}
+.auth-box{width:100%;max-width:460px}
+.auth-title{text-align:center;margin-bottom:24px}
+.auth-title h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.auth-title p{font-size:13px;color:var(--t2);margin-top:4px}
+.auth-card{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.auth-tabs{display:flex;border-bottom:1px solid var(--bdr)}
+.atab{flex:1;padding:13px;background:none;border:none;border-bottom:2px solid transparent;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--t2);cursor:pointer;transition:.18s;margin-bottom:-1px}
+.atab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.auth-body{padding:28px}
+.auth-footer{text-align:center;margin-top:16px;font-family:var(--mono);font-size:10px;color:var(--t3)}
+.auth-footer em{color:var(--gold);font-style:normal}
+
+/* notice */
+.notice{background:linear-gradient(135deg,rgba(74,144,226,.08),rgba(37,204,232,.05));
+  border:1px solid rgba(74,144,226,.2);border-left:3px solid var(--blue);
+  border-radius:var(--r);padding:14px 16px;margin-bottom:20px}
+.notice-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:8px;font-weight:600}
+.notice ul{padding-left:16px}
+.notice li{font-size:12px;color:var(--t1);line-height:1.65;margin-bottom:3px}
+.notice li b{color:var(--t0)}
+
+/* ── FORM ELEMENTS ── */
+.field{margin-bottom:15px}
+.flabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--t2);margin-bottom:7px}
+.flabel .req{color:var(--red);margin-left:2px}
+.flabel .hint{font-size:10px;color:var(--t3);text-transform:none;letter-spacing:0;margin-left:6px}
+input,textarea,select{width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:10px 13px;font-family:var(--sans);font-size:13px;color:var(--t0);outline:none;transition:.18s}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blueglow)}
+input.err,textarea.err,select.err{border-color:var(--red)}
+textarea{resize:vertical;min-height:72px;line-height:1.55}
+select{cursor:pointer}
+select option{background:var(--s1)}
+.ferr{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.ferr.show{display:block}
+.fhint{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5}
+/* password strength */
+.pstr{display:flex;gap:4px;margin-top:6px}
+.pbar{flex:1;height:3px;border-radius:2px;background:var(--bdr);transition:.3s}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 18px;border-radius:var(--r);border:none;cursor:pointer;
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  transition:.18s;white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.btn-blue{background:var(--blue);color:#fff;width:100%}
+.btn-blue:hover:not(:disabled){background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 18px var(--blueglow)}
+.btn-ghost{background:none;color:var(--t2);border:1px solid var(--bdr)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-red{background:var(--redg);color:var(--red);border:1px solid rgba(232,85,85,.3)}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-green{background:var(--greeng);color:var(--green);border:1px solid rgba(39,201,138,.3)}
+.btn-green:hover{background:var(--green);color:#fff}
+.btn-closed{background:var(--blueg);color:var(--blue2);border:1px solid rgba(74,144,226,.35)}
+.btn-closed:hover{background:var(--blue);color:#fff}
+.btn-gold{background:var(--goldg);color:var(--gold);border:1px solid rgba(232,192,37,.3)}
+.btn-gold:hover{background:var(--gold);color:#111}
+.btn-sm{padding:6px 12px;font-size:10px}
+.btn-link{background:none;border:none;color:var(--t2);font-size:12px;cursor:pointer;
+  text-decoration:underline;font-family:var(--sans);padding:0}
+.btn-link:hover{color:var(--blue)}
+
+/* ── MAIN ── */
+#vMain{padding:26px 20px;max-width:1120px;margin:0 auto;display:none}
+#vMain.show{display:block}
+
+/* page head */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:22px;gap:16px;flex-wrap:wrap}
+.ph h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.ph p{font-size:12px;color:var(--t2);margin-top:3px}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px 16px;transition:.2s}
+.stat:hover{border-color:var(--bdr2)}
+.sval{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1}
+.slbl{font-size:11px;color:var(--t2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.c-blue{color:var(--blue)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}.c-green{color:var(--green)}.c-gold{color:var(--gold)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--bdr);margin-bottom:20px;overflow-x:auto}
+.tab{padding:9px 16px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:none;border-bottom:2px solid transparent;color:var(--t2);cursor:pointer;transition:.18s;
+  margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.tc{display:none}.tc.on{display:block}
+
+/* ticket cards */
+.tlist{display:flex;flex-direction:column;gap:8px}
+.tcard{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:14px 18px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:.18s}
+.tcard:hover{border-color:var(--blue);background:var(--s3)}
+.tc-folio{font-family:var(--mono);font-size:10px;color:var(--amber);white-space:nowrap;padding-top:2px;min-width:85px}
+.tc-body{flex:1;min-width:0}
+.tc-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.tc-meta{font-size:11px;color:var(--t2);display:flex;flex-wrap:wrap;gap:10px}
+.tc-tags{display:flex;gap:5px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+
+/* badges */
+.badge{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;white-space:nowrap;border:1px solid}
+.bopen{background:rgba(232,160,37,.1);color:var(--amber);border-color:rgba(232,160,37,.25)}
+.bprog{background:var(--blueg);color:var(--blue2);border-color:rgba(74,144,226,.25)}
+.bres{background:var(--greeng);color:var(--green);border-color:rgba(39,201,138,.25)}
+.bclosed{background:rgba(106,170,248,.1);color:var(--blue2);border-color:rgba(106,170,248,.3)}
+.burg{background:var(--redg);color:var(--red);border-color:rgba(232,85,85,.3)}
+.balta{background:rgba(232,160,37,.08);color:var(--amber);border-color:rgba(232,160,37,.2)}
+.bmedia{background:var(--goldg);color:var(--gold);border-color:rgba(232,192,37,.2)}
+.bbaja{background:var(--greeng);color:var(--green);border-color:rgba(39,201,138,.2)}
+.badm{background:var(--goldg);color:var(--gold);border-color:rgba(232,192,37,.25)}
+.bnew{background:rgba(37,204,232,.08);color:var(--cyan);border-color:rgba(37,204,232,.2)}
+
+/* form panel */
+.fp{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);padding:26px}
+.fp h2{font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.fp .sub{font-size:12px;color:var(--t2);margin-bottom:22px;line-height:1.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+
+/* steps progress */
+.steps{display:flex;align-items:center;margin-bottom:22px;overflow-x:auto;padding-bottom:4px}
+.step{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--bdr);flex-shrink:0;transition:.3s}
+.step.done .sdot{background:var(--green)}.step.done{color:var(--green)}
+.step.active .sdot{background:var(--blue);box-shadow:0 0 0 3px var(--blueglow)}.step.active{color:var(--blue)}
+.sline{flex:1;min-width:20px;height:1px;background:var(--bdr);margin:0 6px;transition:.3s}
+.sline.done{background:var(--green)}
+
+/* dropzone */
+.dz{border:2px dashed var(--bdr);border-radius:var(--r);padding:24px;text-align:center;
+  cursor:pointer;transition:.2s;position:relative;background:var(--s1)}
+.dz:hover,.dz.drag{border-color:var(--blue);background:var(--blueg)}
+.dz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz .di{font-size:26px;margin-bottom:6px}
+.dz p{font-size:12px;color:var(--t2)}
+.dz small{font-size:10px;color:var(--t3);display:block;margin-top:3px}
+.igrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ith{position:relative;width:82px;height:82px;border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr)}
+.ith img{width:100%;height:100%;object-fit:cover;display:block}
+.ith .rm{position:absolute;top:2px;right:2px;background:rgba(232,85,85,.9);color:#fff;
+  border:none;border-radius:50%;width:18px;height:18px;font-size:9px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.ith .inum{position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.75);
+  color:#fff;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:3px}
+
+/* review card */
+.rcard{background:var(--s3);border:1px solid var(--bdr2);border-radius:var(--r);padding:18px;margin-top:18px}
+.rcard-title{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.dr{display:grid;grid-template-columns:130px 1fr;gap:5px 12px;margin-bottom:8px;align-items:start}
+.dl{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding-top:2px}
+.dv{font-size:13px;line-height:1.55}
+.dv a{color:var(--blue);text-decoration:none}
+.dv a:hover{text-decoration:underline}
+hr.div{border:none;border-top:1px solid var(--bdr);margin:12px 0}
+.rev-note{background:var(--blueg);border:1px solid rgba(74,144,226,.2);border-radius:var(--r);
+  padding:12px 14px;margin-top:12px;font-size:12px;color:var(--t1);line-height:1.65}
+.rev-note b{color:var(--blue);font-family:var(--mono);font-size:10px;display:block;margin-bottom:4px;letter-spacing:.06em}
+
+/* modal */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.78);
+  backdrop-filter:blur(5px);display:none;align-items:flex-start;justify-content:center;
+  padding:24px 14px;overflow-y:auto}
+.overlay.on{display:flex}
+.modal{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);
+  width:100%;max-width:720px;overflow:hidden;animation:su .22s ease}
+@keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.mhead{padding:18px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.mhead h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mclose{background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;transition:.15s;line-height:1;padding:4px}
+.mclose:hover{color:var(--t0)}
+.mbody{padding:22px}
+
+/* timeline */
+.tline{display:flex;flex-direction:column;gap:2px;margin-top:12px}
+.tlitem{display:flex;gap:12px;padding:8px 0}
+.tldot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px;flex-shrink:0}
+.tldot.sys{background:var(--t3)}.tldot.done{background:var(--green)}.tldot.closed{background:var(--blue2)}
+.tlbody{flex:1}.tltext{font-size:13px;line-height:1.5}
+.tltime{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px}
+
+/* status row */
+.strow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+.strow select{flex:1;min-width:130px}
+
+/* share row */
+.sharerow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.sharerow input{flex:1;min-width:160px}
+
+/* admin sections */
+.asec{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r2);padding:20px;margin-bottom:14px}
+.asec h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bitem{display:flex;align-items:center;gap:10px}
+.blbl{font-size:12px;color:var(--t1);min-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btrack{flex:1;height:10px;background:var(--s1);border-radius:5px;overflow:hidden}
+.bfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:5px;transition:width .4s}
+.bval{font-family:var(--mono);font-size:11px;color:var(--t2);min-width:28px;text-align:right}
+table.utbl{width:100%;border-collapse:collapse}
+.utbl th{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--t3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--bdr)}
+.utbl td{font-size:12px;padding:8px 10px;border-bottom:1px solid var(--bdr);color:var(--t1)}
+.utbl tr:last-child td{border-bottom:none}
+.utbl tr:hover td{background:var(--s3)}
+
+/* faq */
+.fitem{border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.fq{padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;font-weight:500;background:var(--s3);transition:.15s}
+.fq:hover{background:var(--s4)}
+.fa{padding:12px 14px;font-size:13px;color:var(--t1);line-height:1.65;background:var(--s2);
+  display:none;border-top:1px solid var(--bdr)}
+.fa.on{display:block}
+.ftag{font-family:var(--mono);font-size:9px;background:var(--blueg);color:var(--blue2);
+  border:1px solid rgba(74,144,226,.2);padding:2px 7px;border-radius:3px}
+.fa a{color:var(--blue2)}
+
+/* spinner */
+.spin{width:13px;height:13px;border:2px solid transparent;border-top-color:currentColor;
+  border-radius:50%;animation:sp .5s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* toast */
+#toast{position:fixed;bottom:20px;right:20px;z-index:9998;display:flex;flex-direction:column;gap:7px}
+.tmsg{background:var(--s3);border:1px solid var(--bdr);border-radius:var(--r);padding:11px 16px;
+  font-size:12px;max-width:300px;animation:tin .22s ease;box-shadow:0 8px 26px rgba(0,0,0,.5)}
+.tmsg.ok{border-color:var(--green);color:var(--green)}
+.tmsg.err{border-color:var(--red);color:var(--red)}
+.tmsg.info{border-color:var(--blue);color:var(--blue2)}
+.tmsg.warn{border-color:var(--amber);color:var(--amber)}
+@keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* empty */
+.empty{text-align:center;padding:44px 20px;color:var(--t2)}
+.empty .ei{font-size:38px;margin-bottom:10px;opacity:.35}
+.empty h3{font-family:var(--mono);font-size:13px;color:var(--t1);margin-bottom:5px}
+.empty p{font-size:12px}
+
+/* blocked */
+.blocked-screen{display:none;position:fixed;inset:0;z-index:9990;background:var(--bg);
+  align-items:center;justify-content:center;padding:24px}
+.blocked-screen.on{display:flex}
+.blocked-box{background:var(--s2);border:2px solid var(--red);border-radius:var(--r2);
+  padding:32px;text-align:center;max-width:380px}
+.blocked-box h2{color:var(--red);font-size:18px;margin-bottom:10px}
+.blocked-box p{font-size:13px;color:var(--t1);line-height:1.6}
+
+@media(max-width:600px){
+  #vMain{padding:14px 12px}
+  .fp{padding:18px}
+  .mbody{padding:16px}
+  .dr{grid-template-columns:1fr;gap:2px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="hlogo">
+    <span>Kommo</span><span class="dot">·</span><span>CRM Support</span>
+    <span id="hadmbadge" style="display:none" class="badge badm" >Admin</span>
+  </div>
+  <div class="hright">
+    <div class="gb-badge" id="gbadge"><em>⬡</em> Developed by<br>Golden Bytes</div>
+    <div id="huser"></div>
+    <button class="btn btn-ghost btn-sm" id="hout" onclick="doLogout()">Salir</button>
+  </div>
+</header>
+
+<!-- ══ BLOCKED SCREEN ══ -->
+<div class="blocked-screen" id="blockedScreen">
+  <div class="blocked-box">
+    <h2>⛔ Acceso Restringido</h2>
+    <p>Tu cuenta ha sido desactivada por el administrador.<br><br>Contacta a <b>ISC Oscar Rosado</b><br>oscar.rosado.o@gmail.com</p>
+    <button class="btn btn-ghost btn-sm" style="margin-top:20px;width:auto" onclick="doLogout()">Volver al inicio</button>
+  </div>
+</div>
+
+<!-- ══ AUTH VIEW ══ -->
+<div class="view" id="vAuth">
+  <div class="auth-box">
+    <div class="auth-title">
+      <h1>CRM Support Center</h1>
+      <p>Gestión de incidentes · Kommo CRM</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="atab on" id="at0" onclick="switchTab('login')">Iniciar Sesión</button>
+        <button class="atab" id="at1" onclick="switchTab('reg')">Crear Cuenta</button>
+      </div>
+      <div class="auth-body">
+
+        <!-- LOGIN -->
+        <div id="pLogin">
+          <div class="notice">
+            <div class="notice-title">Aviso antes de continuar</div>
+            <ul>
+              <li>Sistema exclusivo para <b>incidentes técnicos</b> del CRM Kommo.</li>
+              <li>No se atienden mejoras, desarrollos ni trabajo del responsable de cuenta.</li>
+              <li>Embudos nuevos: se evaluará si aplica acompañamiento en <b>modo sombra</b>.</li>
+              <li>Revisado por <b>ISC Oscar Rosado</b> · máx. 24 h hábiles.</li>
+            </ul>
+          </div>
+          <div class="field">
+            <label class="flabel">Usuario <span class="req">*</span></label>
+            <input type="text" id="liUser" placeholder="tu.usuario" autocomplete="username"
+              onkeydown="if(event.key==='Enter')doLogin()"/>
+            <div class="ferr" id="eLiUser">Usuario requerido</div>
+          </div>
+          <div class="field">
+            <label class="flabel">Contraseña <span class="req">*</span></label>
+            <input type="password" id="liPass" placeholder="••••••••" autocomplete="current-password"
+              onkeydown="if(event.key==='Enter')doLogin()"/>
+            <div class="ferr" id="eLiPass">Contraseña requerida</div>
+          </div>
+          <button class="btn btn-blue" id="liBtn" onclick="doLogin()">
+            <span id="liLbl">Acceder al sistema</span>
+          </button>
+          <div style="text-align:center;margin-top:14px">
+            <button class="btn-link" onclick="openModal('mForgot')">¿Olvidaste tu contraseña?</button>
+          </div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="pReg" style="display:none">
+          <div class="notice">
+            <div class="notice-title">Antes de registrarte</div>
+            <ul>
+              <li>Tu nombre aparecerá en todos tus reportes.</li>
+              <li>Usa el correo que revisas a diario — recibirás notificaciones ahí.</li>
+              <li>Contraseña: mín. 6 caracteres, 1 mayúscula, 1 número.</li>
+              <li>Las cuentas pueden ser desactivadas si no corresponden a un usuario autorizado.</li>
+            </ul>
+          </div>
+          <div class="g2">
+            <div class="field">
+              <label class="flabel">Nombre completo <span class="req">*</span></label>
+              <input type="text" id="rgName" placeholder="Ej. María García"/>
+              <div class="ferr" id="eRgName">Nombre requerido</div>
+            </div>
+            <div class="field">
+              <label class="flabel">Empresa / Cliente <span class="req">*</span></label>
+              <input type="text" id="rgCo" placeholder="Ej. Global Box"/>
+              <div class="ferr" id="eRgCo">Empresa requerida</div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="flabel">Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="rgEmail" placeholder="tu@correo.com" autocomplete="email"/>
+            <div class="ferr" id="eRgEmail">Correo válido requerido</div>
+          </div>
+          <div class="g2">
+            <div class="field">
+              <label class="flabel">Usuario <span class="req">*</span> <span class="hint">(mín. 4 car.)</span></label>
+              <input type="text" id="rgUser" placeholder="tu.usuario"
+                oninput="this.value=this.value.replace(/[^a-zA-Z0-9._]/g,'')" autocomplete="username"/>
+              <div class="ferr" id="eRgUser">Mín. 4 car., solo letras/números/punto</div>
+            </div>
+            <div class="field">
+              <label class="flabel">Contraseña <span class="req">*</span></label>
+              <input type="password" id="rgPass" placeholder="Mín. 6 car." autocomplete="new-password"
+                oninput="showPwdStr(this.value)"/>
+              <div class="pstr">
+                <div class="pbar" id="pb0"></div><div class="pbar" id="pb1"></div>
+                <div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div>
+              </div>
+              <div class="ferr" id="eRgPass">Mín. 6 car., 1 mayúscula y 1 número</div>
+            </div>
+          </div>
+          <button class="btn btn-blue" id="rgBtn" onclick="doRegister()">
+            <span id="rgLbl">Crear mi cuenta</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <div class="auth-footer"><em>⬡</em> Developed by Golden Bytes</div>
+  </div>
+</div><!-- /vAuth -->
+
+<!-- ══ MAIN VIEW ══ -->
+<div id="vMain">
+  <div class="ph">
+    <div>
+      <h1 id="phTitle">Panel de Incidentes</h1>
+      <p id="phSub"></p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-ghost btn-sm" onclick="goTab('tTickets')">Mis Tickets</button>
+      <button class="btn btn-blue btn-sm" onclick="goTab('tNew')">+ Nuevo Reporte</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats" id="statsGrid"></div>
+
+  <!-- TABS -->
+  <div class="tabs" id="tabBar">
+    <button class="tab on" id="btnTTickets" onclick="goTab('tTickets')">Mis Tickets</button>
+    <button class="tab" id="btnTNew" onclick="goTab('tNew')">Nuevo Reporte</button>
+    <button class="tab" id="btnTAdmin" onclick="goTab('tAdmin')" style="display:none">Panel Admin</button>
+    <button class="tab" id="btnTFaq" onclick="goTab('tFaq')">Base de Conocimiento</button>
+  </div>
+
+  <!-- MY TICKETS -->
+  <div class="tc on" id="tTickets">
+    <div class="tlist" id="myList"></div>
+  </div>
+
+  <!-- NEW REPORT -->
+  <div class="tc" id="tNew">
+    <div class="fp">
+      <h2>Nuevo Reporte de Incidente</h2>
+      <p class="sub">Complete los campos marcados con <span style="color:var(--red)">*</span>. El folio se asigna automáticamente al confirmar.</p>
+      <div class="steps" id="stepsBar">
+        <div class="step active" id="sp0"><div class="sdot"></div><span>Datos</span></div>
+        <div class="sline" id="sl0"></div>
+        <div class="step" id="sp1"><div class="sdot"></div><span>Descripción</span></div>
+        <div class="sline" id="sl1"></div>
+        <div class="step" id="sp2"><div class="sdot"></div><span>Evidencia</span></div>
+        <div class="sline" id="sl2"></div>
+        <div class="step" id="sp3"><div class="sdot"></div><span>Revisión</span></div>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label class="flabel">Cliente afectado <span class="req">*</span></label>
+          <input type="text" id="fClient" placeholder="Ej. Global Box" oninput="fv('fClient','eFClient')"/>
+          <div class="ferr" id="eFClient">Campo requerido</div>
+        </div>
+        <div class="field">
+          <label class="flabel">Prioridad <span class="req">*</span></label>
+          <select id="fPri" onchange="fv('fPri','eFPri')">
+            <option value="">— Seleccionar —</option>
+            <option value="urgente">🔴 Urgente — Sistema detenido</option>
+            <option value="alta">🟠 Alta — Afecta operación</option>
+            <option value="media">🟡 Media — Funciona parcial</option>
+            <option value="baja">🟢 Baja — Revisión menor</option>
+          </select>
+          <div class="ferr" id="eFPri">Seleccione prioridad</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="flabel">Tipo de incidente <span class="req">*</span></label>
+        <select id="fType" onchange="fv('fType','eFType')">
+          <option value="">— Seleccionar —</option>
+          <option value="bot">Bot / Automatización</option>
+          <option value="embudo">Embudo / Pipeline</option>
+          <option value="webhook">Webhook / Integración</option>
+          <option value="campo">Campo personalizado Kommo</option>
+          <option value="usuario">Usuario / Permisos</option>
+          <option value="notif">Notificaciones</option>
+          <option value="otro">Otro</option>
+        </select>
+        <div class="ferr" id="eFType">Seleccione tipo</div>
+      </div>
+      <div class="field">
+        <label class="flabel">ID o URL de la tarjeta del lead en Kommo <span class="req">*</span></label>
+        <input type="text" id="fLead" placeholder="Ej. https://cuenta.kommo.com/leads/detail/12345"
+          oninput="fv('fLead','eFLead')"/>
+        <div class="fhint">Dato urgente — lleva directo al punto de falla.</div>
+        <div class="ferr" id="eFLead">Campo requerido</div>
+      </div>
+      <div class="field">
+        <label class="flabel">Descripción del problema <span class="req">*</span></label>
+        <textarea id="fDesc" placeholder="Ej. El bot no se activa al recibir un nuevo lead por WhatsApp..."
+          oninput="fv('fDesc','eFDesc');updateSteps()"></textarea>
+        <div class="ferr" id="eFDesc">Mín. 20 caracteres</div>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label class="flabel">¿Qué debería suceder? <span class="req">*</span></label>
+          <textarea id="fExp" rows="3" placeholder="Ej. El bot debería enviar el mensaje de bienvenida."
+            oninput="fv('fExp','eFExp')"></textarea>
+          <div class="ferr" id="eFExp">Campo requerido</div>
+        </div>
+        <div class="field">
+          <label class="flabel">¿Qué está ocurriendo? <span class="req">*</span></label>
+          <textarea id="fAct" rows="3" placeholder="Ej. Sale error 'mensaje no compatible' y el bot se detiene."
+            oninput="fv('fAct','eFAct')"></textarea>
+          <div class="ferr" id="eFAct">Campo requerido</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="flabel">Pasos para reproducir <span class="req">*</span></label>
+        <textarea id="fSteps" rows="4"
+          placeholder="1. Acceder a la tarjeta del lead&#10;2. Enviar mensaje desde WhatsApp&#10;3. El bot no responde"
+          oninput="fv('fSteps','eFSteps');updateSteps()"></textarea>
+        <div class="ferr" id="eFSteps">Mín. 10 caracteres</div>
+      </div>
+      <div class="field">
+        <label class="flabel">Evidencia — capturas de pantalla <span class="hint">(en el orden que las suba)</span></label>
+        <div class="dz" id="dropzone"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="onDrop(event)">
+          <input type="file" id="imgIn" accept="image/*" multiple onchange="onImgs(this.files)"/>
+          <div class="di">🖼️</div>
+          <p>Arrastre imágenes o haga clic para seleccionar</p>
+          <small>PNG · JPG · WEBP — Máx. 5 MB por imagen</small>
+        </div>
+        <div class="igrid" id="imgGrid"></div>
+      </div>
+      <div class="rcard" id="revCard" style="display:none">
+        <div class="rcard-title">Vista Previa — Verifique antes de confirmar</div>
+        <div id="revBody"></div>
+        <div class="rev-note">
+          <b>Responsable de atención</b>
+          Su reporte será revisado y analizado por <b>ISC Oscar Rosado</b>, Consultor TIC.
+          Tiempo de respuesta: <b>máximo 24 horas hábiles</b> desde la recepción del folio.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="clearForm()" style="width:auto">Limpiar</button>
+        <button class="btn btn-blue" id="prevBtn" onclick="previewReport()" style="flex:1">Revisar reporte</button>
+        <button class="btn btn-green" id="subBtn" onclick="submitReport()" style="display:none;flex:1">
+          <span id="subLbl">✓ Confirmar y enviar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="tc" id="tFaq">
+    <div class="fp">
+      <h2>Base de Conocimiento</h2>
+      <p class="sub">Consulte aquí antes de crear un reporte. Puede encontrar soluciones a problemas frecuentes.</p>
+      <div id="faqList"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="tc" id="tAdmin">
+    <div class="stats" id="adminStats" style="margin-bottom:18px"></div>
+    <div class="asec">
+      <h3>📋 Todos los Tickets</h3>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <select id="fltStatus" onchange="renderAdmin()" style="width:auto;flex:1;min-width:120px">
+          <option value="">Todos los estados</option>
+          <option value="open">Abiertos</option>
+          <option value="progress">En proceso</option>
+          <option value="resolved">Resueltos</option>
+          <option value="closed">Finalizados</option>
+        </select>
+        <select id="fltPri" onchange="renderAdmin()" style="width:auto;flex:1;min-width:120px">
+          <option value="">Todas las prioridades</option>
+          <option value="urgente">Urgente</option><option value="alta">Alta</option>
+          <option value="media">Media</option><option value="baja">Baja</option>
+        </select>
+        <input type="text" id="fltQ" placeholder="Buscar..." oninput="renderAdmin()" style="flex:2;min-width:140px"/>
+      </div>
+      <div class="tlist" id="adminList"></div>
+    </div>
+    <div class="g2" style="display:grid;gap:14px">
+      <div class="asec"><h3>📊 Por Cliente</h3><div class="bar-chart" id="chartClient"></div></div>
+      <div class="asec"><h3>🔁 Por Tipo</h3><div class="bar-chart" id="chartType"></div></div>
+    </div>
+    <div class="asec"><h3>⚠ Recurrencia</h3><div id="recurList"></div></div>
+    <div class="asec">
+      <h3>👥 Usuarios</h3>
+      <div style="overflow-x:auto"><table class="utbl" id="userTbl"></table></div>
+    </div>
+    <div class="asec">
+      <h3>📚 Gestión de Base de Conocimiento</h3>
+      <div id="faqAdmList" style="margin-bottom:14px"></div>
+      <div style="background:var(--s3);border:1px solid var(--bdr);border-radius:var(--r);padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px">Agregar artículo</div>
+        <div class="field"><label class="flabel">Pregunta / Título</label>
+          <input type="text" id="faqQin" placeholder="Ej. ¿Por qué el bot no se activa?"/></div>
+        <div class="field"><label class="flabel">Respuesta / Solución</label>
+          <textarea id="faqAin" rows="3" placeholder="Solución paso a paso..."></textarea></div>
+        <div class="field"><label class="flabel">Categoría</label>
+          <select id="faqCat">
+            <option value="bot">Bot / Automatización</option>
+            <option value="embudo">Embudos</option>
+            <option value="webhook">Webhooks</option>
+            <option value="usuario">Usuarios</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="addFaq()">+ Agregar</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /vMain -->
+
+<!-- ══ MODAL: TICKET DETAIL ══ -->
+<div class="overlay" id="mTicket" onclick="if(event.target===this)closeModal('mTicket')">
+  <div class="modal">
+    <div class="mhead"><h3 id="mTicketTitle"></h3><button class="mclose" onclick="closeModal('mTicket')">✕</button></div>
+    <div class="mbody" id="mTicketBody"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: FORGOT PASSWORD ══ -->
+<div class="overlay" id="mForgot" onclick="if(event.target===this)closeModal('mForgot')">
+  <div class="modal" style="max-width:420px">
+    <div class="mhead"><h3>Recuperar contraseña</h3><button class="mclose" onclick="closeModal('mForgot')">✕</button></div>
+    <div class="mbody">
+      <p style="font-size:13px;color:var(--t1);margin-bottom:18px;line-height:1.65">
+        Escribe tu usuario y el correo con el que te registraste. Si coinciden, recibirás una contraseña temporal.
+      </p>
+      <div class="field">
+        <label class="flabel">Usuario <span class="req">*</span></label>
+        <input type="text" id="fpUser" placeholder="tu.usuario"/>
+      </div>
+      <div class="field">
+        <label class="flabel">Correo registrado <span class="req">*</span></label>
+        <input type="email" id="fpEmail" placeholder="tu@correo.com"/>
+      </div>
+      <button class="btn btn-blue" id="fpBtn" onclick="doForgot()">
+        <span id="fpLbl">Enviar contraseña temporal</span>
+      </button>
+      <p style="font-size:11px;color:var(--t3);margin-top:12px;text-align:center">
+        Si no recuerdas tu correo: oscar.rosado.o@gmail.com
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LIGHTBOX ══ -->
+<div id="lbox" onclick="this.style.display='none'"
+  style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.92);
+  align-items:center;justify-content:center;cursor:zoom-out">
+  <img id="lboxImg" style="max-width:92vw;max-height:92vh;border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.8)"/>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════╗
+// ║   ⚙ CONFIGURACIÓN — SOLO EDITA AQUÍ    ║
+// ╚══════════════════════════════════════════╝
+const CFG = {
+  SHEET_URL:   'https://script.google.com/macros/s/AKfycbwiYGVZ6TvQ2LCPQIs_zfwm1NE3VNvHaV80qRevKVDDev-hG67Sy6HVBxSo_a_0RWAU_Q/exec',
+  EJS_SVC:     'service_psx2wgp',
+  EJS_TPL:     'template_csmbf64',
+  EJS_KEY:     'cbBYXPhvDsFd06oZm',
+  WA_PHONE:    '529999476528',
+  WA_KEY:      '9543194',
+  ADMIN_USER:  'oro',
+  ADMIN_PASS:  'GoldenBytes1',
+  ADMIN_NAME:  'ISC Oscar Rosado',
+  ADMIN_EMAIL: 'oscar.rosado.o@gmail.com',
+};
+// ══════════════════════════════════════════
+
+// ── STATE ──
+let CU = null;
+let TICKETS = [];
+let IMGS = [];
+let FAQS = [];
+let ejsLoaded = false;
+
+// ── STORAGE ──
+const DB = {
+  users:   () => { try{ return JSON.parse(localStorage.getItem('crm3_u') || '[]') }catch{ return [] } },
+  saveU:   u  => localStorage.setItem('crm3_u', JSON.stringify(u)),
+  tickets: () => { try{ return JSON.parse(localStorage.getItem('crm3_t') || '[]') }catch{ return [] } },
+  saveT:   t  => localStorage.setItem('crm3_t', JSON.stringify(t)),
+  faqs:    () => { try{ return JSON.parse(localStorage.getItem('crm3_f') || '[]') }catch{ return [] } },
+  saveF:   f  => localStorage.setItem('crm3_f', JSON.stringify(f)),
+  nextFol: () => { const n = parseInt(localStorage.getItem('crm3_fol') || '0') + 1; localStorage.setItem('crm3_fol', n); return n; },
+};
+
+// ── BOOT ──
+function boot() {
+  // Clear any stale session to start fresh
+  // (prevents the "already logged in" ghost session problem)
+  ensureAdmin();
+  initFaqs();
+
+  const saved = sessionStorage.getItem('crm3_session');
+  if (saved) {
+    try {
+      const u = JSON.parse(saved);
+      // Re-validate against current DB
+      const fresh = DB.users().find(x => x.user === u.user);
+      if (fresh && fresh.active !== false) {
+        enterApp(fresh);
+        return;
+      }
+    } catch(e) {}
+    sessionStorage.removeItem('crm3_session');
+  }
+  showAuth();
+}
+
+function ensureAdmin() {
+  const users = DB.users();
+  const idx = users.findIndex(u => u.user === CFG.ADMIN_USER);
+  if (idx < 0) {
+    users.unshift({
+      user: CFG.ADMIN_USER,
+      pass: CFG.ADMIN_PASS,
+      name: CFG.ADMIN_NAME,
+      email: CFG.ADMIN_EMAIL,
+      co: 'Golden Bytes',
+      admin: true,
+      active: true,
+      created: new Date().toISOString(),
+    });
+  } else {
+    // Always sync from CFG so code changes apply immediately
+    users[idx].pass  = CFG.ADMIN_PASS;
+    users[idx].name  = CFG.ADMIN_NAME;
+    users[idx].email = CFG.ADMIN_EMAIL;
+    users[idx].admin = true;
+    users[idx].active = true;
+  }
+  DB.saveU(users);
+}
+
+function initFaqs() {
+  if (DB.faqs().length > 0) return;
+  DB.saveF([
+    { q: '¿Cómo accedo al manual oficial de Kommo CRM?',
+      a: 'Consulta el manual completo en línea:\n\nhttps://learn.zohopublic.com/external/manual/kommo-crm?p=08d09881243fc1cafd4709942a677e35e1f6fe636baa8e1525c56c6ba49356ce\n\nCubre embudos, automatizaciones, bots, integraciones y campos personalizados.',
+      cat: 'general', ts: new Date().toISOString() },
+    { q: '¿Qué incidentes se atienden aquí?',
+      a: 'Solo incidentes técnicos reales del CRM Kommo:\n• Bot no se activa o falla\n• Embudo no avanza correctamente\n• Webhook o integración con error\n• Campo personalizado no guarda\n• Notificaciones que no llegan\n\nNO se atienden: mejoras, desarrollos nuevos ni trabajo del responsable de cuenta.',
+      cat: 'general', ts: new Date().toISOString() },
+    { q: '¿Cómo obtengo el URL o ID del lead en Kommo?',
+      a: '1. Abre Kommo y localiza el lead afectado\n2. Haz clic para abrir su tarjeta\n3. Copia la URL de la barra del navegador\nEj: https://tucuenta.kommo.com/leads/detail/12345\nEl número final es el ID. Inclúyelo siempre en tu reporte.',
+      cat: 'bot', ts: new Date().toISOString() },
+    { q: '¿Cuál es el tiempo de respuesta?',
+      a: 'ISC Oscar Rosado atiende cada reporte en máx. 24 horas hábiles.\n\nRecibirás notificación por correo cuando:\n• Tu reporte es recibido (folio asignado)\n• El estado cambia (En proceso / Resuelto)\n• El ticket es Finalizado',
+      cat: 'general', ts: new Date().toISOString() },
+  ]);
+}
+
+// ── AUTH VIEWS ──
+function showAuth() {
+  g('vAuth').classList.add('show');
+  g('vMain').classList.remove('show');
+  g('vMain').style.display = 'none';
+  g('hout').style.display = 'none';
+  g('huser').style.display = 'none';
+  g('gbadge').style.display = 'none';
+  g('hadmbadge').style.display = 'none';
+}
+
+function switchTab(t) {
+  const isLogin = t === 'login';
+  g('at0').classList.toggle('on', isLogin);
+  g('at1').classList.toggle('on', !isLogin);
+  g('pLogin').style.display = isLogin ? '' : 'none';
+  g('pReg').style.display   = isLogin ? 'none' : '';
+  // Clear fields
+  ['liUser','liPass','rgName','rgCo','rgEmail','rgUser','rgPass'].forEach(id => {
+    const el = g(id); if (el) el.value = '';
+  });
+  document.querySelectorAll('.ferr').forEach(e => e.classList.remove('show'));
+}
+
+function doLogin() {
+  const u = g('liUser').value.trim();
+  const p = g('liPass').value;
+  let ok = true;
+  if (!u) { showErr('eLiUser', true); ok = false; } else showErr('eLiUser', false);
+  if (!p) { showErr('eLiPass', true); ok = false; } else showErr('eLiPass', false);
+  if (!ok) return;
+
+  const users = DB.users();
+  const user = users.find(x => x.user === u && x.pass === p);
+
+  if (!user) {
+    toast('Usuario o contraseña incorrectos', 'err');
+    return;
+  }
+  if (user.active === false) {
+    g('blockedScreen').classList.add('on');
+    return;
+  }
+  sessionStorage.setItem('crm3_session', JSON.stringify(user));
+  enterApp(user);
+}
+
+async function doRegister() {
+  const name  = g('rgName').value.trim();
+  const co    = g('rgCo').value.trim();
+  const email = g('rgEmail').value.trim();
+  const user  = g('rgUser').value.trim();
+  const pass  = g('rgPass').value;
+
+  let ok = true;
+  const chk = (eid, cond) => { showErr(eid, !cond); if (!cond) ok = false; };
+  chk('eRgName',  name.length > 1);
+  chk('eRgCo',    co.length > 1);
+  chk('eRgEmail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  chk('eRgUser',  user.length >= 4 && /^[\w.]+$/.test(user));
+  chk('eRgPass',  validPwd(pass));
+  if (!ok) return;
+
+  const users = DB.users();
+  if (users.find(x => x.user === user)) {
+    toast('Ese usuario ya existe', 'err');
+    return;
+  }
+
+  setBusy('rgBtn','rgLbl', true);
+  const nu = { user, pass, name, email, co, admin: false, active: true, created: new Date().toISOString() };
+  users.push(nu);
+  DB.saveU(users);
+
+  // Notify admin via WA
+  await sendWA('👤 NUEVO USUARIO\\nNombre: ' + name + '\\nEmpresa: ' + co + '\\nUsuario: ' + user + '\\nCorreo: ' + email);
+  // Welcome email to new user
+  await sendEmail({
+    to: email,
+    subject: 'Tu cuenta en CRM Support Center ha sido creada',
+    folio: '—', status: 'Activa', mode: 'BIENVENIDA',
+    reporter: name, company: co, reporter_email: email,
+    description: 'Tu cuenta fue creada exitosamente. Ya puedes reportar incidentes del CRM Kommo.',
+    client: co, lead: '—', priority: '—', type: '—',
+    expected: '—', actual: '—', steps: '—', img_count: 0,
+    comment: '—', new_status: '—',
+    created_at: dtFull(nu.created),
+  });
+
+  setBusy('rgBtn','rgLbl', false);
+  toast('¡Cuenta creada! Bienvenido/a, ' + name.split(' ')[0] + '. Ahora inicia sesión.', 'ok');
+  switchTab('login');
+  g('liUser').value = user;
+}
+
+function doLogout() {
+  const name = CU ? CU.name.split(' ')[0] : '';
+  sessionStorage.removeItem('crm3_session');
+  CU = null;
+  g('blockedScreen').classList.remove('on');
+  showAuth();
+  if (name) toast('¡Hasta pronto, ' + name + '! Sesión cerrada.', 'ok');
+}
+
+function enterApp(user) {
+  CU = user;
+  TICKETS = DB.tickets();
+  FAQS = DB.faqs();
+
+  g('vAuth').classList.remove('show');
+  g('vMain').classList.add('show');
+  g('vMain').style.display = 'block';
+  g('hout').style.display = '';
+  g('huser').style.display = 'flex';
+  g('huser').innerHTML = '<b>' + user.name + '</b>';
+  g('gbadge').style.display = '';
+  if (user.admin) {
+    g('hadmbadge').style.display = '';
+    g('btnTAdmin').style.display = '';
+  }
+  g('phSub').textContent = user.admin
+    ? 'Panel de administrador — ISC Oscar Rosado · Golden Bytes'
+    : user.name + ' · ' + user.co;
+
+  renderStats();
+  renderMyTickets();
+  renderFaq();
+  if (user.admin) renderAdmin();
+}
+
+// ── FORGOT PASSWORD ──
+async function doForgot() {
+  const u = g('fpUser').value.trim();
+  const e = g('fpEmail').value.trim();
+  if (!u || !e) { toast('Completa usuario y correo', 'err'); return; }
+
+  const users = DB.users();
+  const usr = users.find(x => x.user === u && x.email === e);
+  if (!usr) {
+    toast('No encontramos un usuario con esos datos', 'err');
+    return;
+  }
+  setBusy('fpBtn','fpLbl', true);
+
+  // Generate temp password: T + 6 random chars + number
+  const pool = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+  let tmp = 'T';
+  for (let i = 0; i < 5; i++) tmp += pool[Math.floor(Math.random() * pool.length)];
+  tmp += String(Math.floor(Math.random() * 90) + 10);
+
+  usr.pass = tmp;
+  DB.saveU(users);
+
+  await sendEmail({
+    to: usr.email,
+    subject: 'Contraseña temporal — CRM Support Center',
+    folio: 'RECUPERACION', status: '—', mode: 'RECUPERACION DE CONTRASENA',
+    reporter: usr.name, company: usr.co, reporter_email: usr.email,
+    description: 'Tu contraseña temporal es: ' + tmp,
+    client: usr.co, lead: '—', priority: '—', type: '—',
+    expected: 'Ingresa con esta contraseña y cámbiala de inmediato en tu perfil.',
+    actual: '—', steps: 'Contraseña temporal: ' + tmp, img_count: 0,
+    comment: '—', new_status: '—',
+    created_at: dtFull(new Date().toISOString()),
+  });
+  await sendWA('RECUPERACION DE CONTRASENA\\nUsuario: ' + u + '\\nNombre: ' + usr.name);
+
+  setBusy('fpBtn','fpLbl', false);
+  closeModal('mForgot');
+  toast('Contraseña temporal enviada a ' + e + '. Revisa tu correo.', 'ok');
+}
+
+// ── PASSWORD STRENGTH ──
+function showPwdStr(v) {
+  let s = 0;
+  if (v.length >= 6) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (v.length >= 10) s++;
+  const cols = ['#e85555','#e8a025','#e8c025','#27c98a'];
+  for (let i = 0; i < 4; i++) {
+    g('pb' + i).style.background = i < s ? cols[s - 1] : '';
+  }
+}
+function validPwd(v) { return v.length >= 6 && /[A-Z]/.test(v) && /[0-9]/.test(v); }
+
+// ── TABS ──
+function goTab(id) {
+  ['tTickets','tNew','tAdmin','tFaq'].forEach(t => {
+    g(t)?.classList.toggle('on', t === id);
+    const btn = g('btn' + t.charAt(0).toUpperCase() + t.slice(1));
+    btn?.classList.toggle('on', t === id);
+  });
+  if (id === 'tAdmin') renderAdmin();
+}
+
+// ── STATS ──
+function renderStats() {
+  const mine = CU.admin ? TICKETS : TICKETS.filter(t => t.rUser === CU.user);
+  const open = mine.filter(t => t.status === 'open').length;
+  const prog = mine.filter(t => t.status === 'progress').length;
+  const urg  = mine.filter(t => t.priority === 'urgente').length;
+  const res  = mine.filter(t => t.status === 'resolved' || t.status === 'closed').length;
+  g('statsGrid').innerHTML = `
+    <div class="stat"><div class="sval c-blue">${mine.length}</div><div class="slbl">Total</div></div>
+    <div class="stat"><div class="sval c-amber">${open}</div><div class="slbl">Abiertos</div></div>
+    <div class="stat"><div class="sval c-blue">${prog}</div><div class="slbl">En proceso</div></div>
+    <div class="stat"><div class="sval c-red">${urg}</div><div class="slbl">Urgentes</div></div>
+    <div class="stat"><div class="sval c-green">${res}</div><div class="slbl">Resueltos</div></div>`;
+}
+
+// ── BADGE HELPERS ──
+function pbadge(p) {
+  const m={urgente:'burg',alta:'balta',media:'bmedia',baja:'bbaja'};
+  const ic={urgente:'🔴',alta:'🟠',media:'🟡',baja:'🟢'};
+  return `<span class="badge ${m[p]||'bopen'}">${ic[p]||''} ${p||''}</span>`;
+}
+function sbadge(s) {
+  const m={open:'bopen',progress:'bprog',resolved:'bres',closed:'bclosed'};
+  const lb={open:'Abierto',progress:'En proceso',resolved:'Resuelto',closed:'Finalizado'};
+  return `<span class="badge ${m[s]||'bopen'}">${lb[s]||s}</span>`;
+}
+
+// ── MY TICKETS ──
+function renderMyTickets() {
+  const mine = CU.admin ? TICKETS : TICKETS.filter(t => t.rUser === CU.user);
+  const el = g('myList');
+  if (!mine.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">📋</div><h3>Sin reportes</h3><p>Crea tu primer reporte con el botón "+ Nuevo Reporte".</p></div>';
+    return;
+  }
+  el.innerHTML = [...mine].reverse().map(t => `
+    <div class="tcard" onclick="openTicket('${t.id}')">
+      <div class="tc-folio">${t.folio}</div>
+      <div class="tc-body">
+        <div class="tc-title">${t.client} — ${(t.desc||'').substring(0,60)}${t.desc?.length>60?'...':''}</div>
+        <div class="tc-meta">
+          <span>👤 ${t.rName}</span><span>🏢 ${t.rCo}</span>
+          <span>📅 ${dtShort(t.ts)}</span>
+          ${t.imgs?.length ? `<span>🖼 ${t.imgs.length}</span>` : ''}
+        </div>
+      </div>
+      <div class="tc-tags">${pbadge(t.priority)}${sbadge(t.status)}</div>
+    </div>`).join('');
+}
+
+// ── ADMIN ──
+function renderAdmin() {
+  if (!CU?.admin) return;
+  const fs = g('fltStatus')?.value || '';
+  const fp = g('fltPri')?.value || '';
+  const fq = (g('fltQ')?.value || '').toLowerCase();
+  let list = TICKETS;
+  if (fs) list = list.filter(t => t.status === fs);
+  if (fp) list = list.filter(t => t.priority === fp);
+  if (fq) list = list.filter(t =>
+    (t.folio||'').toLowerCase().includes(fq) ||
+    (t.client||'').toLowerCase().includes(fq) ||
+    (t.desc||'').toLowerCase().includes(fq) ||
+    (t.rName||'').toLowerCase().includes(fq));
+
+  const el = g('adminList');
+  el.innerHTML = list.length ? [...list].reverse().map(t => `
+    <div class="tcard" onclick="openTicket('${t.id}')">
+      <div class="tc-folio">${t.folio}</div>
+      <div class="tc-body">
+        <div class="tc-title">${t.client} — ${(t.desc||'').substring(0,55)}...</div>
+        <div class="tc-meta"><span>👤 ${t.rName}</span><span>🏢 ${t.rCo}</span><span>📅 ${dtShort(t.ts)}</span></div>
+      </div>
+      <div class="tc-tags">${pbadge(t.priority)}${sbadge(t.status)}</div>
+    </div>`).join('')
+    : '<div class="empty"><div class="ei">🔍</div><h3>Sin resultados</h3></div>';
+
+  g('adminStats').innerHTML = `
+    <div class="stat"><div class="sval c-blue">${TICKETS.length}</div><div class="slbl">Total global</div></div>
+    <div class="stat"><div class="sval c-amber">${TICKETS.filter(t=>t.status==='open').length}</div><div class="slbl">Abiertos</div></div>
+    <div class="stat"><div class="sval c-blue">${TICKETS.filter(t=>t.status==='progress').length}</div><div class="slbl">En proceso</div></div>
+    <div class="stat"><div class="sval c-green">${TICKETS.filter(t=>t.status==='closed').length}</div><div class="slbl">Finalizados</div></div>
+    <div class="stat"><div class="sval c-red">${TICKETS.filter(t=>t.priority==='urgente').length}</div><div class="slbl">Urgentes</div></div>
+    <div class="stat"><div class="sval c-gold">${DB.users().filter(u=>!u.admin).length}</div><div class="slbl">Usuarios</div></div>`;
+
+  renderBar('chartClient', countBy(TICKETS, 'client'));
+  renderBar('chartType',   countBy(TICKETS, 'type'));
+  renderRecur();
+  renderUsers();
+  renderFaqAdmin();
+}
+
+function countBy(arr, k) {
+  const m = {};
+  arr.forEach(t => { const v = t[k] || '—'; m[v] = (m[v] || 0) + 1; });
+  return Object.entries(m).sort((a,b) => b[1]-a[1]).slice(0,8);
+}
+function renderBar(id, data) {
+  const el = g(id);
+  if (!data.length) { el.innerHTML = '<p style="font-size:12px;color:var(--t3)">Sin datos</p>'; return; }
+  const max = data[0][1] || 1;
+  el.innerHTML = data.map(([k,v]) => `
+    <div class="bitem">
+      <div class="blbl" title="${k}">${k}</div>
+      <div class="btrack"><div class="bfill" style="width:${Math.round(v/max*100)}%"></div></div>
+      <div class="bval">${v}</div>
+    </div>`).join('');
+}
+function renderRecur() {
+  const m = {};
+  TICKETS.forEach(t => { const k = (t.client||'?') + '|' + (t.type||'?'); m[k] = (m[k]||0)+1; });
+  const rep = Object.entries(m).filter(([,v]) => v >= 2).sort((a,b) => b[1]-a[1]);
+  g('recurList').innerHTML = rep.length
+    ? rep.map(([k,v]) => {
+        const [cl,ty] = k.split('|');
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s3);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:6px">
+          <span class="badge burg">${v}x</span>
+          <span style="font-size:13px;flex:1"><b>${cl}</b> — ${ty}</span>
+        </div>`;
+      }).join('')
+    : '<div class="empty" style="padding:16px"><div class="ei">✅</div><p>No hay incidentes recurrentes.</p></div>';
+}
+function renderUsers() {
+  const users = DB.users().filter(u => !u.admin);
+  g('userTbl').innerHTML = `<thead><tr><th>Usuario</th><th>Nombre</th><th>Empresa</th><th>Correo</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>${users.map(u => `<tr>
+      <td style="font-family:var(--mono);font-size:11px">${u.user}</td>
+      <td>${u.name}</td><td>${u.co}</td><td>${u.email}</td>
+      <td>${u.active!==false ? '<span class="badge bres">Activo</span>' : '<span class="badge burg">Bloqueado</span>'}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${u.active!==false
+          ? `<button class="btn btn-red btn-sm" onclick="toggleUser('${u.user}',false)">Bloquear</button>`
+          : `<button class="btn btn-green btn-sm" onclick="toggleUser('${u.user}',true)">Activar</button>`}
+        <button class="btn btn-gold btn-sm" onclick="resetPwd('${u.user}')">Reset pwd</button>
+      </td>
+    </tr>`).join('')}</tbody>`;
+}
+
+function toggleUser(user, active) {
+  if (!confirm((active?'Activar':'Bloquear') + ' usuario ' + user + '?')) return;
+  const users = DB.users();
+  const u = users.find(x => x.user === user);
+  if (u) { u.active = active; DB.saveU(users); toast('Usuario ' + (active?'activado':'bloqueado'), 'ok'); renderAdmin(); }
+}
+function resetPwd(user) {
+  const p = prompt('Nueva contraseña para ' + user + '\n(mín. 6 car., 1 mayúscula, 1 número):');
+  if (!p) return;
+  if (!validPwd(p)) { toast('La contraseña no cumple los requisitos', 'err'); return; }
+  const users = DB.users();
+  const u = users.find(x => x.user === user);
+  if (u) { u.pass = p; DB.saveU(users); toast('Contraseña actualizada', 'ok'); }
+}
+
+// ── FAQ ──
+function renderFaq() {
+  FAQS = DB.faqs();
+  const el = g('faqList');
+  if (!FAQS.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">📚</div><h3>Sin artículos</h3><p>El administrador publicará soluciones próximamente.</p></div>';
+    return;
+  }
+  el.innerHTML = FAQS.map((f,i) => `
+    <div class="fitem">
+      <div class="fq" onclick="toggleFaq(${i})">
+        <span>${f.q}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="ftag">${f.cat||'general'}</span>
+          <span style="color:var(--t3);font-size:16px" id="far${i}">+</span>
+        </div>
+      </div>
+      <div class="fa" id="fab${i}">${f.a.replace(/\n/g,'<br>').replace(
+        /(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>'
+      )}</div>
+    </div>`).join('');
+}
+function toggleFaq(i) {
+  const b = g('fab'+i), a = g('far'+i);
+  b.classList.toggle('on');
+  a.textContent = b.classList.contains('on') ? '−' : '+';
+}
+function renderFaqAdmin() {
+  const el = g('faqAdmList');
+  if (!FAQS.length) { el.innerHTML = '<p style="font-size:12px;color:var(--t3)">Sin artículos aún.</p>'; return; }
+  el.innerHTML = FAQS.map((f,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s3);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:6px">
+      <span class="ftag">${f.cat}</span>
+      <span style="font-size:12px;flex:1">${f.q}</span>
+      <button class="btn btn-red btn-sm" onclick="deleteFaq(${i})">Eliminar</button>
+    </div>`).join('');
+}
+function addFaq() {
+  const q = g('faqQin').value.trim(), a = g('faqAin').value.trim(), cat = g('faqCat').value;
+  if (!q||!a) { toast('Completa pregunta y respuesta', 'err'); return; }
+  FAQS.push({ q, a, cat, ts: new Date().toISOString() });
+  DB.saveF(FAQS);
+  g('faqQin').value = ''; g('faqAin').value = '';
+  toast('Artículo agregado', 'ok');
+  renderFaq(); renderFaqAdmin();
+}
+function deleteFaq(i) {
+  if (!confirm('¿Eliminar este artículo?')) return;
+  FAQS.splice(i,1); DB.saveF(FAQS);
+  toast('Artículo eliminado', 'warn');
+  renderFaq(); renderFaqAdmin();
+}
+
+// ── FORM ──
+function fv(id, eid) {
+  const el = g(id), v = el.value.trim();
+  let ok = v.length > 0;
+  if (id === 'fDesc') ok = v.length >= 20;
+  if (id === 'fSteps') ok = v.length >= 10;
+  el.classList.toggle('err', !ok);
+  showErr(eid, !ok);
+  updateSteps();
+  return ok;
+}
+function updateSteps() {
+  const fields = ['fClient','fPri','fType','fLead','fDesc','fExp','fAct','fSteps'];
+  const filled = fields.filter(f => (g(f)?.value||'').trim().length > 0).length;
+  [[0,null,0],[1,0,2],[2,1,5],[3,2,8]].forEach(([s,l,min]) => {
+    const done   = filled > min;
+    const active = !done && filled >= (min === 0 ? 0 : min - 1);
+    g('sp'+s)?.classList.toggle('done',done);
+    g('sp'+s)?.classList.toggle('active', active && !done);
+    if (l !== null) g('sl'+l)?.classList.toggle('done',done);
+  });
+}
+
+// ── IMAGES ──
+function onImgs(files) {
+  Array.from(files).forEach(f => {
+    if (f.size > 5*1024*1024) { toast('Imagen demasiado grande: ' + f.name, 'err'); return; }
+    const r = new FileReader();
+    r.onload = e => { IMGS.push({ name: f.name, data: e.target.result }); renderImgs(); };
+    r.readAsDataURL(f);
+  });
+}
+function onDrop(e) { e.preventDefault(); g('dropzone').classList.remove('drag'); onImgs(e.dataTransfer.files); }
+function renderImgs() {
+  g('imgGrid').innerHTML = IMGS.map((im,i) => `
+    <div class="ith">
+      <img src="${im.data}" onclick="lboxShow('${im.data}')"/>
+      <div class="inum">${i+1}</div>
+      <button class="rm" onclick="rmImg(${i})">✕</button>
+    </div>`).join('');
+}
+function rmImg(i) { IMGS.splice(i,1); IMGS.forEach((im,j)=>im.n=j+1); renderImgs(); }
+function lboxShow(src) { g('lbox').style.display='flex'; g('lboxImg').src=src; }
+
+// ── FOLIO ──
+function mkFolio(desc, user, client) {
+  const n = String(DB.nextFol()).padStart(4,'0');
+  const kw = {bot:'BOT',automatiz:'BOT',webhook:'WHK',integr:'WHK',embudo:'EMB',pipeline:'EMB',campo:'CAM',usuario:'USR',notif:'NTF'};
+  let type = 'INC';
+  const dl = (desc||'').toLowerCase();
+  for (const [k,v] of Object.entries(kw)) { if (dl.includes(k)) { type=v; break; } }
+  const ini = (user||'').substring(0,3).toUpperCase().replace(/[^A-Z]/g,'');
+  const cli = (client||'').replace(/\s+/g,'').substring(0,3).toUpperCase().replace(/[^A-Z]/g,'');
+  const now = new Date();
+  const ts  = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  return `${n}-${type}-${ini}-${cli}-${ts}`;
+}
+const pad = n => String(n).padStart(2,'0');
+
+// ── PREVIEW & SUBMIT ──
+function previewReport() {
+  const req = ['fClient','fPri','fType','fLead','fDesc','fExp','fAct','fSteps'];
+  const errs= ['eFClient','eFPri','eFType','eFLead','eFDesc','eFExp','eFAct','eFSteps'];
+  let ok = true;
+  req.forEach((id,i) => { if (!fv(id, errs[i])) ok = false; });
+  if (!ok) { toast('Completa todos los campos requeridos', 'err'); return; }
+
+  const folio = mkFolio(gv('fDesc'), CU.user, gv('fClient'));
+  g('revCard').dataset.folio = folio;
+  g('revBody').innerHTML = `
+    <div class="dr"><div class="dl">Folio</div><div class="dv"><b style="color:var(--amber);font-family:var(--mono)">${folio}</b></div></div>
+    <div class="dr"><div class="dl">Reporta</div><div class="dv">${CU.name} · ${CU.co}</div></div>
+    <div class="dr"><div class="dl">Cliente</div><div class="dv">${gv('fClient')}</div></div>
+    <div class="dr"><div class="dl">Prioridad</div><div class="dv">${gv('fPri')}</div></div>
+    <div class="dr"><div class="dl">Tipo</div><div class="dv">${gv('fType')}</div></div>
+    <div class="dr"><div class="dl">Lead / URL</div><div class="dv">${gv('fLead')}</div></div>
+    <hr class="div"/>
+    <div class="dr"><div class="dl">Problema</div><div class="dv">${gv('fDesc')}</div></div>
+    <div class="dr"><div class="dl">Esperado</div><div class="dv">${gv('fExp')}</div></div>
+    <div class="dr"><div class="dl">Real</div><div class="dv">${gv('fAct')}</div></div>
+    <div class="dr"><div class="dl">Pasos</div><div class="dv">${gv('fSteps').replace(/\n/g,'<br>')}</div></div>
+    <div class="dr"><div class="dl">Imágenes</div><div class="dv">${IMGS.length} adjunta(s)</div></div>`;
+
+  g('revCard').style.display = '';
+  g('prevBtn').style.display = 'none';
+  g('subBtn').style.display  = '';
+  toast('Revise el resumen y confirme el envío', 'info');
+  g('revCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function submitReport() {
+  const folio = g('revCard').dataset.folio;
+  setBusy('subBtn','subLbl', true);
+  const now = new Date().toISOString();
+  const ticket = {
+    id: Date.now().toString(), folio,
+    status: 'open', priority: gv('fPri'), type: gv('fType'),
+    client: gv('fClient'), lead: gv('fLead'),
+    desc: gv('fDesc'), expected: gv('fExp'), actual: gv('fAct'), steps: gv('fSteps'),
+    imgs: IMGS.map(i => i.data),
+    rName: CU.name, rUser: CU.user, rEmail: CU.email, rCo: CU.co,
+    ts: now, updatedAt: now,
+    activity: [{ type:'created', text:'Reporte creado por ' + CU.name + ' (' + CU.co + ')', time: now, user: CU.name }],
+  };
+  TICKETS.push(ticket);
+  DB.saveT(TICKETS);
+
+  await toSheet(ticket);
+  const ep = {
+    folio: ticket.folio, status: ticket.status, mode: 'NUEVO REPORTE',
+    priority: ticket.priority, type: ticket.type, client: ticket.client,
+    reporter: ticket.rName, company: ticket.rCo, reporter_email: ticket.rEmail,
+    lead: ticket.lead, description: ticket.desc, expected: ticket.expected,
+    actual: ticket.actual, steps: ticket.steps, img_count: ticket.imgs.length,
+    comment: '—', new_status: '—', created_at: dtFull(ticket.ts),
+    subject: 'NUEVO INCIDENTE [' + ticket.folio + '] — ' + ticket.client + ' — ' + ticket.priority,
+  };
+  // Email to admin
+  await sendEmail({ ...ep, to: CFG.ADMIN_EMAIL });
+  // Email to reporter if different
+  if (ticket.rEmail && ticket.rEmail !== CFG.ADMIN_EMAIL) {
+    await sendEmail({ ...ep, to: ticket.rEmail,
+      subject: 'Tu reporte fue recibido [' + ticket.folio + ']' });
+  }
+  await sendWA('NUEVO INCIDENTE\\nFolio: ' + ticket.folio + '\\nPrioridad: ' + ticket.priority.toUpperCase() + '\\nCliente: ' + ticket.client + '\\nReporta: ' + ticket.rName + '\\nProblema: ' + ticket.desc.substring(0,100));
+
+  setBusy('subBtn','subLbl', false);
+  g('subBtn').style.display = 'none';
+  g('prevBtn').style.display = '';
+  g('revCard').style.display = 'none';
+  toast('Reporte ' + folio + ' enviado correctamente', 'ok');
+  clearForm();
+  renderMyTickets();
+  renderStats();
+  if (CU.admin) renderAdmin();
+  goTab('tTickets');
+}
+
+function clearForm() {
+  ['fClient','fPri','fType','fLead','fDesc','fExp','fAct','fSteps'].forEach(id => {
+    const el = g(id); if (el) { el.value = ''; el.classList.remove('err'); }
+  });
+  document.querySelectorAll('.ferr').forEach(e => e.classList.remove('show'));
+  IMGS = [];
+  g('imgGrid').innerHTML = '';
+  g('revCard').style.display = 'none';
+  g('prevBtn').style.display = '';
+  g('subBtn').style.display = 'none';
+  updateSteps();
+}
+
+// ── TICKET DETAIL ──
+function openTicket(id) {
+  const t = TICKETS.find(x => x.id === id); if (!t) return;
+  const isAdmin = CU.admin;
+
+  g('mTicketTitle').innerHTML = `<span style="font-family:var(--mono);color:var(--amber);font-size:12px">${t.folio}</span> ${pbadge(t.priority)} ${sbadge(t.status)}`;
+
+  g('mTicketBody').innerHTML = `
+    <div class="dr"><div class="dl">Cliente</div><div class="dv">${t.client}</div></div>
+    <div class="dr"><div class="dl">Tipo</div><div class="dv">${t.type||'—'}</div></div>
+    <div class="dr"><div class="dl">Reporta</div><div class="dv">${t.rName} · ${t.rCo}</div></div>
+    <div class="dr"><div class="dl">Lead / URL</div><div class="dv"><a href="${t.lead.startsWith('http')?t.lead:'#'}" target="_blank">${t.lead}</a></div></div>
+    <div class="dr"><div class="dl">Fecha</div><div class="dv">${dtFull(t.ts)}</div></div>
+    <hr class="div"/>
+    <div class="dr"><div class="dl">Problema</div><div class="dv">${t.desc}</div></div>
+    <div class="dr"><div class="dl">Esperado</div><div class="dv">${t.expected}</div></div>
+    <div class="dr"><div class="dl">Real</div><div class="dv">${t.actual}</div></div>
+    <div class="dr"><div class="dl">Pasos</div><div class="dv">${(t.steps||'').replace(/\n/g,'<br>')}</div></div>
+    ${t.imgs?.length ? `<hr class="div"/>
+      <div class="dl" style="margin-bottom:8px">Evidencia (${t.imgs.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${t.imgs.map((img,i) => `<div style="position:relative">
+          <div style="position:absolute;top:2px;left:2px;background:rgba(0,0,0,.75);color:#fff;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:3px;z-index:1">${i+1}</div>
+          <img src="${img}" onclick="lboxShow('${img}')" style="width:100px;height:76px;object-fit:cover;border-radius:var(--r);border:1px solid var(--bdr);cursor:pointer;display:block"/>
+        </div>`).join('')}
+      </div>` : ''}
+    <hr class="div"/>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Actividad</div>
+    <div class="tline">
+      ${(t.activity||[]).map(a => `
+        <div class="tlitem">
+          <div class="tldot ${a.type==='closed'?'closed':a.type==='resolved'?'done':a.type==='system'?'sys':''}"></div>
+          <div class="tlbody"><div class="tltext">${a.text}</div><div class="tltime">${dtFull(a.time)} · ${a.user||'Sistema'}</div></div>
+        </div>`).join('')}
+    </div>
+    <hr class="div"/>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Agregar comentario / actualización</div>
+    <textarea id="cmtIn" rows="2" placeholder="Escribe un comentario o nota..."></textarea>
+    <div class="strow">
+      ${isAdmin ? `<select id="stSel">
+        <option value="">— Sin cambio de estado —</option>
+        <option value="progress">En proceso</option>
+        <option value="resolved">Resuelto</option>
+      </select>` : ''}
+      <button class="btn btn-blue btn-sm" onclick="addComment('${id}')" style="width:auto">Guardar actualización</button>
+      ${isAdmin && t.status !== 'closed' ? `<button class="btn btn-closed" onclick="closeTicket('${id}')" style="width:auto">🔒 Finalizar Ticket</button>` : ''}
+    </div>
+    <hr class="div"/>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Compartir este ticket</div>
+    <div class="sharerow">
+      <input type="text" id="shareTo" placeholder="Correo o número (10 dígitos sin +52)"/>
+      <button class="btn btn-ghost btn-sm" onclick="shareTicket('${id}','email')">📧 Email</button>
+      <button class="btn btn-ghost btn-sm" onclick="shareTicket('${id}','wa')">💬 WhatsApp</button>
+      <button class="btn btn-ghost btn-sm" onclick="shareTicket('${id}','sms')">📱 SMS</button>
+    </div>`;
+
+  openModal('mTicket');
+}
+
+async function addComment(id) {
+  const cmt = g('cmtIn')?.value?.trim();
+  const st  = g('stSel')?.value;
+  if (!cmt && !st) { toast('Escribe un comentario o cambia el estado', 'err'); return; }
+  const idx = TICKETS.findIndex(t => t.id === id); if (idx < 0) return;
+  const now = new Date().toISOString();
+  if (!TICKETS[idx].activity) TICKETS[idx].activity = [];
+  if (cmt) TICKETS[idx].activity.push({ type:'comment', text: cmt, time: now, user: CU.name });
+  if (st) {
+    TICKETS[idx].status = st;
+    TICKETS[idx].activity.push({ type: st==='resolved'?'resolved':'system',
+      text: 'Estado actualizado a "' + (st==='resolved'?'Resuelto':'En proceso') + '" por ' + CU.name,
+      time: now, user: CU.name });
+  }
+  TICKETS[idx].updatedAt = now;
+  DB.saveT(TICKETS);
+
+  const t = TICKETS[idx];
+  const ep = {
+    folio: t.folio, status: st || t.status, mode: 'ACTUALIZACIÓN',
+    priority: t.priority, type: t.type, client: t.client,
+    reporter: t.rName, company: t.rCo, reporter_email: t.rEmail,
+    lead: t.lead, description: t.desc, expected: t.expected,
+    actual: t.actual, steps: t.steps, img_count: t.imgs?.length||0,
+    comment: cmt||'—', new_status: st||'sin cambio', created_at: dtFull(t.ts),
+    subject: 'Actualización [' + t.folio + '] — ' + t.client,
+  };
+  await sendEmail({ ...ep, to: CFG.ADMIN_EMAIL });
+  if (t.rEmail && t.rEmail !== CFG.ADMIN_EMAIL)
+    await sendEmail({ ...ep, to: t.rEmail });
+  await sendWA('TICKET ACTUALIZADO\\nFolio: ' + t.folio + '\\nCliente: ' + t.client + (st ? '\\nNuevo estado: ' + st : '') + (cmt ? '\\nComentario: ' + cmt : ''));
+
+  renderMyTickets(); renderStats();
+  if (CU.admin) renderAdmin();
+  closeModal('mTicket');
+  toast('Ticket actualizado — notificaciones enviadas', 'ok');
+}
+
+async function closeTicket(id) {
+  if (!confirm('¿Finalizar este ticket? Se notificará al usuario y quedará cerrado permanentemente.')) return;
+  const idx = TICKETS.findIndex(t => t.id === id); if (idx < 0) return;
+  const now = new Date().toISOString();
+  TICKETS[idx].status = 'closed';
+  TICKETS[idx].closedAt = now;
+  TICKETS[idx].activity.push({ type:'closed', text: 'Ticket finalizado por ' + CU.name + '. Caso cerrado.', time: now, user: CU.name });
+  TICKETS[idx].updatedAt = now;
+  DB.saveT(TICKETS);
+
+  const t = TICKETS[idx];
+  const ep = {
+    folio: t.folio, status: 'closed', mode: 'FINALIZADO',
+    priority: t.priority, type: t.type, client: t.client,
+    reporter: t.rName, company: t.rCo, reporter_email: t.rEmail,
+    lead: t.lead, description: t.desc, expected: t.expected,
+    actual: t.actual, steps: t.steps, img_count: t.imgs?.length||0,
+    comment: 'Ticket finalizado por ' + CU.name, new_status: 'closed',
+    created_at: dtFull(t.ts),
+    subject: 'TICKET FINALIZADO [' + t.folio + '] — ' + t.client,
+  };
+  await sendEmail({ ...ep, to: CFG.ADMIN_EMAIL });
+  if (t.rEmail && t.rEmail !== CFG.ADMIN_EMAIL)
+    await sendEmail({ ...ep, to: t.rEmail });
+  await sendWA('TICKET FINALIZADO\\nFolio: ' + t.folio + '\\nCliente: ' + t.client + '\\nCerrado por: ' + CU.name);
+
+  renderMyTickets(); renderStats();
+  if (CU.admin) renderAdmin();
+  closeModal('mTicket');
+  toast('Ticket ' + t.folio + ' finalizado. Notificaciones enviadas.', 'ok');
+}
+
+function shareTicket(id, via) {
+  const t = TICKETS.find(x => x.id === id); if (!t) return;
+  const dest = (g('shareTo')?.value || '').trim();
+  const msg  = 'Reporte CRM Kommo\nFolio: ' + t.folio + '\nCliente: ' + t.client + '\nEstado: ' + t.status + '\nProblema: ' + t.desc + '\nReporta: ' + t.rName + ' · ' + t.rCo;
+  if (via === 'email') {
+    window.open('mailto:' + (dest||t.rEmail) + '?subject=Ticket ' + t.folio + ' CRM&body=' + encodeURIComponent(msg));
+  } else if (via === 'wa') {
+    let ph = dest.replace(/\D/g,'');
+    if (ph.length === 10) ph = '52' + ph;
+    window.open('https://wa.me/' + (ph||CFG.WA_PHONE) + '?text=' + encodeURIComponent(msg));
+  } else {
+    window.open('sms:' + dest.replace(/\D/g,'') + '?body=' + encodeURIComponent(msg));
+  }
+}
+
+// ── NOTIFICATIONS ──
+async function toSheet(ticket) {
+  if (!CFG.SHEET_URL) return;
+  try {
+    fetch(CFG.SHEET_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        folio: ticket.folio, status: ticket.status, priority: ticket.priority,
+        type: ticket.type, client: ticket.client, lead: ticket.lead,
+        desc: ticket.desc, expected: ticket.expected, actual: ticket.actual,
+        steps: ticket.steps, reporter: ticket.rName, email: ticket.rEmail,
+        company: ticket.rCo, imgCount: ticket.imgs?.length||0, createdAt: ticket.ts,
+      }),
+    });
+  } catch(e) { console.warn('Sheet:', e); }
+}
+
+async function sendEmail(params) {
+  if (!CFG.EJS_KEY) return;
+  try {
+    if (!ejsLoaded) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+        s.onload = () => { window.emailjs.init(CFG.EJS_KEY); ejsLoaded = true; res(); };
+        s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    await window.emailjs.send(CFG.EJS_SVC, CFG.EJS_TPL, {
+      to_email:       params.to,
+      subject:        params.subject || 'CRM Support Center',
+      folio:          params.folio          || '—',
+      status:         params.status         || '—',
+      mode:           params.mode           || '—',
+      priority:       params.priority       || '—',
+      type:           params.type           || '—',
+      client:         params.client         || '—',
+      reporter:       params.reporter       || '—',
+      company:        params.company        || '—',
+      reporter_email: params.reporter_email || '—',
+      lead:           params.lead           || '—',
+      description:    params.description    || '—',
+      expected:       params.expected       || '—',
+      actual:         params.actual         || '—',
+      steps:          params.steps          || '—',
+      img_count:      params.img_count      || 0,
+      comment:        params.comment        || '—',
+      new_status:     params.new_status     || '—',
+      created_at:     params.created_at     || '—',
+    });
+  } catch(e) { console.warn('Email:', e); }
+}
+
+async function sendWA(msg) {
+  if (!CFG.WA_KEY) return;
+  try {
+    const url = 'https://api.callmebot.com/whatsapp.php?phone=' + CFG.WA_PHONE + '&text=' + encodeURIComponent(msg.replace(/\\n/g,'\n')) + '&apikey=' + CFG.WA_KEY;
+    const img = new Image(); img.src = url;
+    fetch(url, { mode: 'no-cors' }).catch(() => {});
+  } catch(e) { console.warn('WA:', e); }
+}
+
+// ── UTILS ──
+const g   = id => document.getElementById(id);
+const gv  = id => (g(id)?.value || '').trim();
+function showErr(id, show) { const el = g(id); if (el) el.classList.toggle('show', show); }
+function setBusy(btnId, lblId, busy) {
+  const btn = g(btnId), lbl = g(lblId);
+  if (btn) btn.disabled = busy;
+  if (lbl) lbl.innerHTML = busy ? '<span class="spin"></span> Procesando...' : lbl.dataset.orig || lbl.textContent;
+  if (lbl && !lbl.dataset.orig && !busy) lbl.dataset.orig = lbl.textContent;
+}
+function openModal(id)  { g(id).classList.add('on'); }
+function closeModal(id) { g(id).classList.remove('on'); }
+function dtShort(iso) { try { return new Date(iso).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}); } catch{ return iso||''; } }
+function dtFull(iso)  { try { return new Date(iso).toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch{ return iso||''; } }
+function toast(msg, type='info') {
+  const c = g('toast');
+  const el = document.createElement('div');
+  el.className = 'tmsg ' + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 4500);
+}
+
+// ── START ──
+boot();
+</script>
+</body>
+</html>
